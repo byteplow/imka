@@ -1,0 +1,7 @@
+click
+dirhash
+docker
+Jinja2
+pyaml
+scp
+paramiko

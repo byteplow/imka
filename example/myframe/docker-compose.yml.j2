@@ -1,0 +1,18 @@
+version: '3.9'
+
+services:
+  nginx:
+    image: nginx
+    volumes:
+      - {{imka.mount_dir('./www')}}:/var/www
+    configs:
+      - source: my_config
+        target: /etc/nginx/conf
+    environment:
+      akey: "{{object.akey}}"
+      key: "{{my_custom_value}}"
+      deployment: "{{deployment_fullname}}"
+      dev: "{{dev}}"
+
+configs:
+  my_config: {{imka.config_from_template('./conf.j2')}}

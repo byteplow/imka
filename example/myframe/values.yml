@@ -1,0 +1,4 @@
+object:
+  akey: 123
+
+dev: "{{variable}}"
