@@ -1,13 +1,13 @@
 import os
 import hashlib
-from dirhash import dirhash
 import shutil
-import util
 
+from . import util
+
+from dirhash import dirhash
 from dataclasses import dataclass
 from paramiko import SSHClient, AutoAddPolicy
 from scp import SCPClient
-
 
 @dataclass
 class Mount:
@@ -55,6 +55,24 @@ class Mount:
         context['mounts'].append(mount)
 
         return mount
+
+def apply_mounts(context):
+    for mount in context['mounts']:
+        names = mount.apply(context)
+        for name in names:
+            print('mount {} created'.format(name))
+
+def after_apply_mounts(context):
+    if context['options'].get('remove_old_mount_versions_on_apply', False):
+        for mount in context['mounts']:
+            removed = mount.remove_old_versions(context)
+            for name in removed:
+                print('mount {} removed'.format(name)) 
+
+def down_mounts(context):
+    removed = Mount.down(context)
+    for name in removed:
+        print('mount {} removed'.format(name))
 
 def get_mount_provisioner(context):
     match context['options'].get('mount_provisioner', 'LocalMountProvisioner'):
@@ -108,7 +126,7 @@ class LocalMountProvisioner:
         if os.path.exists(idlessPath):
             shutil.rmtree(idlessPath)
             return [idlessPath]
-        
+
         return []
 
 class SshMountProvisioner:

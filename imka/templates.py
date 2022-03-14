@@ -1,11 +1,12 @@
 import jinja2
 import json
-import util
 import yaml
-
-from configs import Config
-from mounts import Mount
 import copy
+
+from . import util
+from .configs import Config
+from .mounts import Mount
+
 
 class ImkaFunctions:
     def __init__(self, context):
@@ -41,3 +42,16 @@ def render_template(context, content):
     rendered = template.render(j2context)
 
     return yaml.safe_load(rendered)
+
+def render_compose_templates(context):
+    compose = {}
+
+    for path in context['compose_templates']:
+        with util.open_with_context(context, path) as file:
+            content = file.read()
+        
+        compose = util.merge_yaml(compose, render_template(context, content))
+
+        print('compose_template {} rendered'.format(path))
+
+    context['docker_stack_yml'] = compose

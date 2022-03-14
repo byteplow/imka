@@ -1,7 +1,7 @@
 import hashlib
 import docker
 
-import util
+from . import util
 
 from dataclasses import dataclass
 
@@ -114,3 +114,21 @@ class Config:
     def list(context):
         for config in context['configs'].values():
             print(config)
+
+def apply_configs(context):
+    for config in context['configs']:
+        name = config.apply(context)
+        if name:
+            print('config {} created'.format(name))
+
+def down_configs(context):
+    removed = Config.down(context)
+    for name in removed:
+        print('config {} removed'.format(name))
+
+def after_apply_configs(context):
+    if context['options'].get('remove_old_config_versions_on_apply', False):
+        for config in context['configs']:
+            removed = config.remove_old_versions(context)
+            for name in removed:
+                print('config {} removed'.format(name))

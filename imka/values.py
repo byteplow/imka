@@ -1,10 +1,14 @@
-import util
 import jinja2
 import yaml
 
+from . import util
+
+def load_values(context):
+    read_from_files(context)
+    render(context)
+
 def read_from_files(context):
     values = context['values']
-
 
     for path in context['value_files']:
         with open(path) as file:

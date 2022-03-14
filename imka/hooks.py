@@ -1,8 +1,9 @@
 import glob
 import json
 import subprocess
-import util
 import sys
+
+#import util
 
 def run_hooks(context, name):
     for path in _find_hooks(context, name):
