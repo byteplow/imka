@@ -37,11 +37,10 @@ def render_template(context, content):
     j2context = copy.copy(context['values'])
     j2context['imka'] = ImkaFunctions(context)
 
-
     template = jinja2.Template(content)
     rendered = template.render(j2context)
 
-    return yaml.safe_load(rendered)
+    return rendered
 
 def render_compose_templates(context):
     compose = {}
@@ -50,7 +49,7 @@ def render_compose_templates(context):
         with util.open_with_context(context, path) as file:
             content = file.read()
         
-        compose = util.merge_yaml(compose, render_template(context, content))
+        compose = util.merge_yaml(compose, yaml.safe_load(render_template(context, content)))
 
         print('compose_template {} rendered'.format(path))
 
