@@ -38,13 +38,10 @@ class Config:
             'd4rk.io/imka/config/id': self.configId,
         }
 
-        templating = {}
         if self.docker_templating:
-            templating = {
-                'name': 'golang',
-            }
-
-        cli.configs.create(name=self.version, data=data, labels=labels, templating={})
+            cli.configs.create(name=self.version, data=data, labels=labels, templating={'name': 'golang'})
+        else:
+            cli.configs.create(name=self.version, data=data, labels=labels)
 
         return self.version
 
