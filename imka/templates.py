@@ -1,56 +1,34 @@
 import jinja2
-import json
 import yaml
-import copy
 
-from . import util
-from .configs import Config
-from .mounts import Mount
+class TemplateController:
+    def render_template(self, content, values):
+        template = jinja2.Template(content)
 
+        return template.render(values)
 
-class ImkaFunctions:
-    def __init__(self, context):
-        self.context = context
+    def render_compose_templates(self, frame, values):
+        rendered = []
+        compose = {}
 
-    def config_from_file(self, path, docker_templating=False):
-        config = Config.from_file(self.context, path, docker_templating)
+        for path in frame.get_compose_templates():
+            with frame.fileProvider.open(path) as file:
+                content = file.read()
+            
+            compose = self._merge_yaml(compose, yaml.safe_load(self.render_template(content, values)))
 
-        return json.dumps({"external": True, "name": config.version})
+            rendered.append(path)
 
-    def config_from_template(self, path):
-        with util.open_with_context(self.context, path) as file:
-            template = file.read()
+        frame.compose_yml = compose
 
-        content = render_template(self.context, template)
+        return rendered
 
-        config = Config.from_content(self.context, path, content)
+    def _merge_yaml(self, destination, source):
+        for key, value in source.items():
+            if isinstance(value, dict) and value:
+                node = destination.get(key, {})
+                destination[key] = self._merge_yaml(node, value)
+            else:
+                destination[key] = value
 
-        return json.dumps({"external": True, "name": config.version})
-
-    def mount_dir(self, path):
-        mount = Mount.from_path(self.context, path)
-
-        return mount.mountPath
-
-
-def render_template(context, content):
-    j2context = copy.copy(context['values'])
-    j2context['imka'] = ImkaFunctions(context)
-
-    template = jinja2.Template(content)
-    rendered = template.render(j2context)
-
-    return rendered
-
-def render_compose_templates(context):
-    compose = {}
-
-    for path in context['compose_templates']:
-        with util.open_with_context(context, path) as file:
-            content = file.read()
-        
-        compose = util.merge_yaml(compose, yaml.safe_load(render_template(context, content)))
-
-        print('compose_template {} rendered'.format(path))
-
-    context['docker_stack_yml'] = compose
+        return destination
