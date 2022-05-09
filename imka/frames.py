@@ -1,9 +1,9 @@
-COMPOSE_VERSION_POSTFIX = '-imka/v1'
-
 import yaml
+from urllib.parse import urlparse
 
-from .file_provider import FileProvider
+from .file_provider import FileProvider, GitFileProvider
 
+COMPOSE_VERSION_POSTFIX = '-imka/v1'
 
 class FrameController:
     templateController: object
@@ -15,11 +15,15 @@ class FrameController:
         self.imkaConfigController = imkaConfigController
         self.stackController = stackController
         
-    def load_frame_from_uri(self, uri):
-        return self.load_frame_from_path(uri)
+    def load_frame_from_uri(self, frame_url, version):
+        url = urlparse(frame_url)
 
-    def load_frame_from_path(self, path):
-        fileProvider = FileProvider(path)
+        if url.scheme == '':
+            fileProvider = FileProvider(frame_url)
+        elif url.scheme in ['git+https', 'git+ssh', 'git+file']:
+            fileProvider = GitFileProvider(frame_url, version)
+        else:
+            raise Exception("unknown url schema for frame")
 
         with fileProvider.open('frame.yml') as file:
             config = yaml.safe_load(file)

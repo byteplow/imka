@@ -2,16 +2,21 @@
 ## package manager for docker swarm
 Imka is a wrapper for docker stack. Imka reads values from multiple yaml files and merges them. The values then are use to render the docker compose templates. And finlay apply the result docker compose stack using "docker stack deploy".
 
-In addition imka extends the docker compose format. To support configs from dirs and Jinja2 templating.
+##### Features
++ multiple value files
++ docker compose templating with jinja2
++ docker config templating with jinja2
++ dirs as docker config
++ using frames in remote git repos
 
 ## todo
 - exception handling - currently the python an lib errors are shown - priority lowish
-- read frames from git repos - priority after high
 - template value read and write to etcd - e.g service discovery between frame/clusters e.g. ingress network ... - dose it need it? - not that high > priority > lowish
 - config support sort syntax
 - dir templating white/blacklist
 - supporting configs.configs
 - secrets
+- todo load values from remote servers repos
 
 ## Frame
 An imka package is called a frame. It is a directory which must contain an frame.yml and one or more compose templates. It may also contain a values.yml, and a folder of hooks and arbitrary other files.
@@ -81,8 +86,15 @@ There are 3 predefined values 'deployment', 'deployment_fullname' and 'frame_nam
 
 Values can be show with `imka values`
 
+## Git
+Frames can be retrieved from git. The frame name specified as following: `git+https://github.com/byteplow/imka.git#example/myframe`. Where `https://github.com/byteplow/imka.git` is a url pointing to a git repository. `example/myframe` is the frames path in the git repo. The frame path is optional. Imka supports `git+https`, `git+ssh` and `git+file`.
+
+The cli option `..version` allows to set a git tag, commit or branch to be used. The default is main.
+
+The repo are cached in `~/.cache/imka.d4rk.io`. There specific path is `~/.cache/imka.d4rk.io/sha[:2]/sha`m where `sha` is the sha256sum of the repo uri.
+
 ## cli
-FRAME path to frame directory
+FRAME path to frame directory or git url 
 DEPLOYMENT deployment name
 
 ```
@@ -104,7 +116,9 @@ Options:
   -f, --values PATH              specify values in YAML files to customize the
                                  frame deployment
   --render-values-depth INTEGER  specify the max allowed value template
-                                 nesteding depth
+                                 nesting depth
+  --version TEXT                 specify a frame version, only works for git:
+                                 tag, branch or commit                
   --help                         Show this message and exit.
 
 
@@ -114,7 +128,9 @@ Options:
   -f, --values PATH              specify values in YAML files to customize the
                                  frame deployment
   --render-values-depth INTEGER  specify the max allowed value template
-                                 nesteding depth
+                                 nesting depth
+  --version TEXT                 specify a frame version, only works for git:
+                                 tag, branch or commit
   --help                         Show this message and exit.
 
 
@@ -124,7 +140,9 @@ Options:
   -f, --values PATH              specify values in YAML files to customize the
                                  frame deployment
   --render-values-depth INTEGER  specify the max allowed value template
-                                 nesteding depth
+                                 nesting depth
+  --version TEXT                 specify a frame version, only works for git:
+                                 tag, branch or commit
   --help                         Show this message and exit.
 
 
@@ -134,7 +152,9 @@ Options:
   -f, --values PATH              specify values in YAML files to customize the
                                  frame deployment
   --render-values-depth INTEGER  specify the max allowed value template
-                                 nesteding depth
+                                 nesting depth
+  --version TEXT                 specify a frame version, only works for git:
+                                 tag, branch or commit
   --help                         Show this message and exit.
 ```
 

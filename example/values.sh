@@ -1,3 +1,3 @@
 #!/bin/sh
 
-imka values myframe test-deploy -f ./custom-values.yml
+imka values git+https://github.com/byteplow/imka.git#example/myframe test-deploy -f ./custom-values.yml

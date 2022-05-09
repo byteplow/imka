@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='imka',
-    version='0.0.2',    
+    version='0.1.0',    
     description='A docker swarm package manager',
     url='https://github.com/byteplow/imka',
     author='byteplow',

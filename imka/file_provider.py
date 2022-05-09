@@ -1,7 +1,13 @@
 import os
 import os.path
+import hashlib
+from urllib.parse import urlparse
+from git import Repo
+from pathlib import Path
 
-class FileProvider():
+GIT_CHACHE_BASE_PATH = '~/.cache/imka.d4rk.io'
+
+class FileProvider:
     basePath: str
 
     def __init__(self, basePath):
@@ -29,3 +35,30 @@ class FileProvider():
 
     def get_real_path(self, path):
         return os.path.join(self.basePath, path)
+
+class GitFileProvider(FileProvider):
+    def __init__(self, frame_url, version):
+        self.version = version
+        if not self.version:
+            self.version = 'main'
+
+        url = urlparse(frame_url)
+        scheme = {'git+https': 'https', 'git+ssh': 'ssh', 'git+file': 'file'}.get(url.scheme)
+        self.repo_url = url._replace(scheme=scheme, fragment='').geturl()
+
+        url_hash = hashlib.sha256(self.repo_url.encode()).hexdigest()
+        self.repo_path = os.path.expanduser(os.path.join(GIT_CHACHE_BASE_PATH, url_hash[:2],url_hash))
+
+        if not os.path.exists(self.repo_path):
+            self.repo = Repo.clone_from(self.repo_url, to_path=self.repo_path)
+        else:
+            self.repo = Repo(self.repo_path)
+
+        self.repo.head.reference = self.repo.commit(self.version)
+        self.repo.head.reset(index=True, working_tree=True)
+
+        self.basePath = os.path.join(self.repo_path, url.fragment)
+        if not os.path.exists(self.basePath):
+            raise Exception('Frame subpath ({}) in repo dose not exist - {}'.format(url.fragment, self.basePath) )
+        
+        self.basePath
