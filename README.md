@@ -9,6 +9,9 @@ Imka is a wrapper for docker stack. Imka reads values from multiple yaml files a
 + dirs as docker config
 + using frames in remote git repos
 
+##### Install
+`pip install imka`
+
 ## todo
 - exception handling - currently the python an lib errors are shown - priority lowish
 - template value read and write to etcd - e.g service discovery between frame/clusters e.g. ingress network ... - dose it need it? - not that high > priority > lowish
