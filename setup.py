@@ -1,8 +1,9 @@
 from setuptools import setup
+import os
 
 setup(
     name='imka',
-    version='0.1.0',    
+    version=os.popen('git describe --tags').read().strip(),    
     description='A docker swarm package manager',
     url='https://github.com/byteplow/imka',
     author='byteplow',
@@ -19,6 +20,7 @@ setup(
         'scp',
         'paramiko', 
     ],
+    long_description=open(os.path.join(os.path.dirname(__file__), 'README.md')).read(),
     project_urls={
         'Source': 'https://github.com/byteplow/imka',
     },
