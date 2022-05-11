@@ -20,7 +20,6 @@ setup(
         'scp',
         'paramiko', 
     ],
-    long_description=open(os.path.join(os.path.dirname(__file__), 'README.md')).read(),
     project_urls={
         'Source': 'https://github.com/byteplow/imka',
     },
