@@ -133,6 +133,17 @@ class ImkaConfigController:
 
         return removed
 
+    def docker_dump_all_configs(self, values):
+        results = []
+
+        configs = self.dockerClient.configs.list(filters={"label": 'd4rk.io/imka/deployment={}'.format(values['deployment_fullname'])})
+        configs += self.dockerClient.configs.list(filters={"label": 'com.docker.stack.namespace={}'.format(values['deployment_fullname'])})
+
+        for config in configs:
+            results.append(config.attrs['Spec'])
+
+        return results
+
     def evaluate_compose_yml(self, frame, values):
         if 'configs' not in frame.compose_yml:
             frame.compose_yml['configs'] = {}

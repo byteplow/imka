@@ -51,3 +51,13 @@ def apply(ctx, frame, deployment, values, render_values_depth, version):
 @click.pass_context
 def down(ctx, frame, deployment, values, render_values_depth, version):
     ctx.obj.down(frame, deployment, values, render_values_depth, version)
+
+@main.command()
+@click.argument('frame', type=str)
+@click.argument('deployment', type=str)
+@click.option('--values', '-f', multiple=True, type=click.Path(exists=True), help='specify values in YAML files to customize the frame deployment')
+@click.option('--render-values-depth', type=int, default=32, help='specify the max allowed value template nesting depth')
+@click.option('--version', type=str, help='specify a frame version, only works for git: tag, branch or commit')
+@click.pass_context
+def dump(ctx, frame, deployment, values, render_values_depth, version):
+    print(yaml.dump(ctx.obj.dump(frame, deployment, values, render_values_depth, version)))

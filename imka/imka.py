@@ -14,7 +14,7 @@ class ImkaController:
         self.frameController = FrameController(
             TemplateController(),
             ImkaConfigController(docker.from_env(), TemplateController()),
-            StackController(),
+            StackController(docker.from_env()),
         )
 
         self.valueController = ValueController()
@@ -47,7 +47,17 @@ class ImkaController:
         self.load_values(frame, deployment, value_files, render_values_depth, version)
         return self.frameController.apply(self.frame, self.values)
         
-
     def down(self, frame, deployment, value_files, render_values_depth, version):
         self.load_values(frame, deployment, value_files, render_values_depth, version)
         self.frameController.down(self.values)
+
+    def docker_dump_all_configs(self, frame, deployment, value_files, render_values_depth, version):
+        self.load_values(frame, deployment, value_files, render_values_depth, version)
+
+        self.frameController.dump_all_configs(self.values)
+
+    def dump(self, frame, deployment, value_files, render_values_depth, version):
+        self.load_values(frame, deployment, value_files, render_values_depth, version)
+
+        return self.frameController.dump(self.frame, self.values)
+        

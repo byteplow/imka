@@ -73,6 +73,27 @@ class FrameController:
         for cfg in deleted:
             print('Removing config {}'.format(cfg))
 
+    def dump(self, frame, values):
+        """
+        returns the spec for all running configs for this deployment - including standart docker config created by compose
+        """
+        self.evaluate_compose_yml(frame, values)
+
+        configs = self.imkaConfigController.docker_dump_all_configs(values)
+        service_image_map = self.stackController.get_service_image_map(values)
+
+        self._repace_service_images_with_specif_versions(frame, service_image_map)
+
+        return {
+            'compose_yml': frame.compose_yml,
+            'configs': configs
+        }
+
+    def _repace_service_images_with_specif_versions(self, frame, service_image_map):
+        for serviceName, service in frame.compose_yml.get('services', {}).items():
+            service['image'] = service_image_map[serviceName]
+        
+
 class Frame:
     fileProvider: None
     compose_yml: dict
