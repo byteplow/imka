@@ -30,7 +30,7 @@ def values(ctx, frame, deployment, values, render_values_depth, version):
 def template(ctx, frame, deployment, values, render_values_depth, version):
     ctx.obj.render_templates(frame, deployment, values, render_values_depth, version)
     print('---')
-    print(yaml.dump(ctx.obj.chart.compose_yml))
+    print(yaml.dump(ctx.obj.frame.compose_yml))
 
 @main.command()
 @click.argument('frame', type=str)
