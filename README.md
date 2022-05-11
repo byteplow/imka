@@ -65,13 +65,23 @@ services:
         mode: 0440
         template:
           enabled: true
+          white_list:
+            - templated_file.conf.j2
+          drop_extension: true
 ```
 `type: imka` must be set for imka to process this config.
 
 `source` can now be a file or a directory. If source is a directory a config for any file in the directory and subdirectory is created.
-The files are mounted at the target path `path/to/node/file1` get mounted at `/redis_config/file1`.
+The configs are thant mounted at the target path `path/to/node/file1` get mounted at `/redis_config/file1`.
+
 
 `template.enabled` enables imka jinja2 templating with the current values. For directory every file is templated.
+
+`template.white_list` and `template.black_list` are optional. They specify a list of files which should or should not be templated. `template.white_list` only these files will be templated. 
+`template.black_list` all files not on this list will be templated. If both are given only `template.black_list` is used.
+The file path must be relative to the `source`. The file `chart_root/path/to/node/templated_file.conf.j2` must be listed as `templated_file.conf.j2`.
+
+`template.drop_extension` drops the extension of templated files. eg. `templated_file.conf.j2` will be mounted as `templated_file.conf`. (specific behavior: python os.path.splitext(mount_path))
 
 `uid`, `gid`, `mode` work as defined.
 

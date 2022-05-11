@@ -20,7 +20,7 @@ class ImkaConfigController:
     def _add_config(self, frame, values, sourcePath, targetPath, imka_templating, mount_uid, mount_gid, mount_mode):
         if not frame.fileProvider.isdir(sourcePath):
             return [
-                self._create_config(frame, values, sourcePath, targetPath, imka_templating, mount_uid, mount_gid, mount_mode, None)
+                self._create_config(frame, values, sourcePath, targetPath, imka_templating.get('enabled', False), mount_uid, mount_gid, mount_mode, None)
             ]
 
         configId = self._generate_config_id(values, sourcePath)
@@ -30,13 +30,25 @@ class ImkaConfigController:
             pathRelativeToSource = os.path.relpath(path, sourcePath)
             mountPath = os.path.join(targetPath, pathRelativeToSource)
 
-            config = self._create_config(frame, values, path, mountPath, imka_templating, mount_uid, mount_gid, mount_mode, configId)
+            template = False
+            if imka_templating.get('enabled', False):
+                if 'white_list' in imka_templating:
+                    template = pathRelativeToSource in imka_templating.get('white_list', {})
+
+                if 'black_list' in imka_templating:
+                    template = pathRelativeToSource not in imka_templating.get('black_list', {})
+
+            if template and imka_templating.get('drop_extension', False):
+                mountPath = os.path.splitext(mountPath)
+
+            config = self._create_config(frame, values, path, mountPath, template, mount_uid, mount_gid, mount_mode, configId)
             configs.append(config)
 
         return configs
 
-    def _create_config(self, frame, values, sourcePath, targetPath, imka_templating, mount_uid, mount_gid, mount_mode, belongs_to):
-        data = self._read_data(frame, values, sourcePath, imka_templating)
+
+    def _create_config(self, frame, values, sourcePath, targetPath, template, mount_uid, mount_gid, mount_mode, belongs_to):
+        data = self._read_data(frame, values, sourcePath, template)
 
         config = ImkaConfig(
             self._generate_config_id(values, sourcePath),
@@ -53,8 +65,8 @@ class ImkaConfigController:
 
         return config
 
-    def _read_data(self, frame, values, sourcePath, imka_templating):
-        if imka_templating != True:
+    def _read_data(self, frame, values, sourcePath, template):
+        if template != True:
             with frame.fileProvider.open(sourcePath, 'rb') as file:
                 return file.read()
 
@@ -138,7 +150,7 @@ class ImkaConfigController:
 
                 sourcePath = serviceConfig.get('source', False)
                 targetPath = serviceConfig.get('target', False)
-                imka_templating = serviceConfig.get('template', {}).get('enabled', False)
+                imka_templating = serviceConfig.get('template', {})
                 mount_uid = serviceConfig.get('uid', False)
                 mount_gid = serviceConfig.get('gid', False)
                 mount_mode = serviceConfig.get('mode', False)

@@ -7,6 +7,10 @@ services:
       - source: www
         target: /var/lib/www
         type: imka
+        template:
+          enabled: true
+          white_list:
+            - templated_file.conf.j2
       - source: conf.j2
         target: /etc/nginx/conf
         type: imka
