@@ -54,6 +54,8 @@ class GitFileProvider(FileProvider):
         else:
             self.repo = Repo(self.repo_path)
 
+        self.repo.remotes.origin.fetch()
+
         self.repo.head.reference = self.repo.commit(self.version)
         self.repo.head.reset(index=True, working_tree=True)
 
